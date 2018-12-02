@@ -13,18 +13,19 @@ defmodule Aoc2018.DayTwoTest do
 
   test "matching boxes by character difference", %{input: input} do
     assert ["uqcidadzwtnhesljvxyobmkfyr", "uqcidadzwtnhwsljvxyobmkfyr"] ==
-             DayTwo.locate_closest_matches_myers(input)
+             DayTwo.locate_closest_matches(input, :myers)
   end
 
-  test "common letters - myers", %{input: input} do
-    [a, b] = DayTwo.locate_closest_matches_myers(input)
-    assert "uqcidadzwtnhsljvxyobmkfyr" == DayTwo.common_letters_myers(a, b)
-  end
+  describe "common letters" do
+    test "using myers difference", %{input: input} do
+      [a, b] = DayTwo.locate_closest_matches(input, :myers)
+      assert "uqcidadzwtnhsljvxyobmkfyr" == DayTwo.common_letters(a, b, :myers)
+    end
 
-  test "common letters - binary matching", %{input: input} do
-    [a, b] = DayTwo.locate_closest_matches_binary(input)
-
-    assert "uqcidadzwtnhsljvxyobmkfyr" == DayTwo.common_letters_binary(a, b)
+    test "using binary matching", %{input: input} do
+      [a, b] = DayTwo.locate_closest_matches(input, :binary)
+      assert "uqcidadzwtnhsljvxyobmkfyr" == DayTwo.common_letters(a, b, :binary)
+    end
   end
 
   def str_to_line_list(str) do
