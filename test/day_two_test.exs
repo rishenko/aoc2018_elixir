@@ -13,12 +13,18 @@ defmodule Aoc2018.DayTwoTest do
 
   test "matching boxes by character difference", %{input: input} do
     assert ["uqcidadzwtnhesljvxyobmkfyr", "uqcidadzwtnhwsljvxyobmkfyr"] ==
-             DayTwo.locate_closest_matches(input)
+             DayTwo.locate_closest_matches_myers(input)
   end
 
-  test "common letters", %{input: input} do
-    [a, b] = DayTwo.locate_closest_matches(input)
-    DayTwo.common_letters(a, b) |> inspect() |> IO.puts()
+  test "common letters - myers", %{input: input} do
+    [a, b] = DayTwo.locate_closest_matches_myers(input)
+    assert "uqcidadzwtnhsljvxyobmkfyr" == DayTwo.common_letters_myers(a, b)
+  end
+
+  test "common letters - binary matching", %{input: input} do
+    [a, b] = DayTwo.locate_closest_matches_binary(input)
+
+    assert "uqcidadzwtnhsljvxyobmkfyr" == DayTwo.common_letters_binary(a, b)
   end
 
   def str_to_line_list(str) do

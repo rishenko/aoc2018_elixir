@@ -40,34 +40,78 @@ defmodule Aoc2018.DayTwo do
     end
   end
 
-  def common_letters(a, b) do
+  def locate_closest_matches_myers(input) do
+    input
+    |> Task.async_stream(&find_closest_line_myers(&1, input))
+    |> Enum.filter(fn {:ok, {_, matches}} -> length(matches) > 0 end)
+    |> Enum.map(fn {:ok, {v, _}} -> v end)
+  end
+
+  def find_closest_line_myers(line, all_lines) do
+    expected_length = String.length(line) - 1
+
+    {line,
+     Enum.reduce(all_lines, [], fn
+       ^line, acc ->
+         acc
+
+       input_line, acc ->
+         String.myers_difference(input_line, line)
+         |> Enum.filter(fn {k, _} -> k == :eq end)
+         |> Enum.reduce(0, fn {_, v}, acc -> String.length(v) + acc end)
+         |> case do
+           ^expected_length -> [input_line | acc]
+           _ -> acc
+         end
+     end)}
+  end
+
+  def common_letters_myers(a, b) do
     String.myers_difference(a, b)
     |> Enum.filter(fn {k, _} -> k == :eq end)
     |> Enum.map(fn {_, v} -> v end)
     |> Enum.join("")
   end
 
-  def locate_closest_matches(input) do
-      input
-      |> Task.async_stream(&find_closest_line(&1, input))
-      |> Enum.filter(fn {:ok, {_, matches}} -> length(matches) > 0 end)
-      |> Enum.map(fn {:ok, {v, _}} -> v end)
+  def locate_closest_matches_binary(input) do
+    input
+    |> Task.async_stream(&find_closest_line_binary(&1, input))
+    |> Enum.filter(fn {:ok, {_, matches}} -> length(matches) > 0 end)
+    |> Enum.map(fn {:ok, {v, _}} -> v end)
   end
 
-  def find_closest_line(line, all_lines) do
+  def find_closest_line_binary(line, all_lines) do
     expected_length = String.length(line) - 1
+
     {line,
-      Enum.reduce(all_lines, [],
-      fn ^line, acc -> acc
-         input_line, acc ->
-        String.myers_difference(input_line, line)
-        |> Enum.filter(fn {k, _} -> k == :eq end)
-        |> Enum.reduce(0, fn {_, v}, acc -> String.length(v) + acc end)
-        |> case do
-          ^expected_length -> [input_line | acc]
-          _ -> acc
-        end
-      end)
-    }
+     Enum.reduce(all_lines, [], fn
+       ^line, acc ->
+         acc
+
+       input_line, acc ->
+         common_chars = common_letters_binary(input_line, line)
+
+         case String.length(common_chars) do
+           ^expected_length -> [input_line | acc]
+           _ -> acc
+         end
+     end)}
+  end
+
+  def common_letters_binary(a, b) do
+    do_common_letters_binary(a, b, [])
+    |> Enum.reverse()
+    |> Enum.join("")
+  end
+
+  def do_common_letters_binary(<<>>, _, acc), do: acc
+  def do_common_letters_binary(_, <<>>, acc), do: acc
+
+  def do_common_letters_binary(<<c, rest_1::binary>>, <<c, rest_2::binary>>, acc) do
+    do_common_letters_binary(rest_1, rest_2, [<<c>> | acc])
+  end
+
+  def do_common_letters_binary(<<_, rest_1::binary>>, <<_, rest_2::binary>>, acc) do
+    do_common_letters_binary(rest_1, rest_2, acc)
   end
 end
