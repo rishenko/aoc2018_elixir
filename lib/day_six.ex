@@ -26,10 +26,33 @@ defmodule Aoc2018.DaySix do
     {hx, hy}
   end
 
-  def calculate_final_area_map(area_map) do
-    Enum.map(area_map, fn {loc, _, _, coord} ->
+  def calculate_final_area_map(area_list) do
+    Enum.map(area_list, fn {loc, _, _, coord} ->
       {loc, coord}
     end)
+  end
+
+  def get_finite_results(area_list, hx, hy) do
+    coords_to_ignore = Enum.reduce(area_list, MapSet.new(), fn {{x, y}, coord}, set ->
+      if x == 0 or x == hx or y == 0 or y == hy do
+        MapSet.put(set, coord)
+      else
+        set
+      end
+    end)
+
+    Enum.filter(area_list, fn {_, coord} -> coord not in coords_to_ignore end)
+  end
+
+  def count_area_by_coord(area_list) do
+
+    Enum.reduce(area_list, %{}, fn {_, coord}, acc ->
+      Map.update(acc, coord, 1, fn v -> v + 1 end)
+    end)
+  end
+
+  def get_coord_with_greatest_area(coord_count_list) do
+    Enum.sort(coord_count_list, fn {_, count1}, {_, count2} -> count1 > count2 end) |> hd()
   end
 
   def build_coord_manhattan_distance(coords) do
@@ -69,16 +92,16 @@ defmodule Aoc2018.DaySix do
   def highest(v1, v2) when v1 > v2, do: v1
   def highest(_, v2), do: v2
 
-  def save_board(file_name, area_map, named_coords, hx, hy, scale) do
-    svg = board_to_svg(area_map, named_coords, hx, hy, scale)
+  def save_board(file_name, area_list, named_coords, hx, hy, scale) do
+    svg = board_to_svg(area_list, named_coords, hx, hy, scale)
     File.write!("./#{file_name}", svg)
   end
 
-  def board_to_svg(area_map, named_coords, hx, hy, scale) do
+  def board_to_svg(area_list, named_coords, hx, hy, scale) do
     width = hx*scale
     height = hy*scale
     content =
-      Enum.map(area_map, fn {loc, coord} ->
+      Enum.map(area_list, fn {loc, coord} ->
         case coord do
           :multiple ->
             svg_text_elem(".", loc, scale, "normal")

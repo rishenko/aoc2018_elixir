@@ -150,3 +150,6 @@ day_six_area_map = DaySix.build_coord_manhattan_distance(day_six_coords)
 day_six_final_area_map = DaySix.calculate_final_area_map(day_six_area_map)
 scale = 30
 DaySix.save_board("day_six_area_map.svg", day_six_final_area_map, day_six_coords_named, br_x, br_y, scale)
+finite_results = DaySix.get_finite_results(day_six_final_area_map, br_x, br_y)
+finite_coord_count = DaySix.count_area_by_coord(finite_results)
+{loc, 4016} = DaySix.get_coord_with_greatest_area(finite_coord_count)
