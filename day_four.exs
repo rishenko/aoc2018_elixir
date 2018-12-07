@@ -137,7 +137,7 @@ example_data = """
 example_data_coords = example_data |> String.split("\n") |> Enum.map(&DaySix.line_to_coord(&1))
 example_data_coords_named = Enum.zip(?A..?A+length(example_data_coords)-1, example_data_coords) |> Enum.map(fn {n, l} -> {l, <<n>>} end) |> Enum.into(%{})
 {br_x, br_y} = DaySix.calculate_bottom_right_point(example_data_coords)
-area_map = DaySix.build_coord_manhattan_distance(example_data_coords)
+area_map = DaySix.build_owning_coord_matrix(example_data_coords)
 final_area_map = DaySix.calculate_final_area_map(area_map)
 scale = 30
 DaySix.save_board("area_map.svg", final_area_map, example_data_coords_named, br_x, br_y, scale)
@@ -146,10 +146,15 @@ DaySix.save_board("area_map.svg", final_area_map, example_data_coords_named, br_
 day_six_coords = "priv/day_six_input.txt" |> File.read!() |> String.trim() |> String.split("\n") |> Enum.map(&DaySix.line_to_coord(&1))
 day_six_coords_named = Enum.zip(?A..?A+length(day_six_coords)-1, day_six_coords) |> Enum.map(fn {n, l} -> {l, <<n>>} end) |> Enum.into(%{})
 {br_x, br_y} = DaySix.calculate_bottom_right_point(day_six_coords)
-day_six_area_map = DaySix.build_coord_manhattan_distance(day_six_coords)
+day_six_area_map = DaySix.build_owning_coord_matrix(day_six_coords)
 day_six_final_area_map = DaySix.calculate_final_area_map(day_six_area_map)
 scale = 30
 DaySix.save_board("day_six_area_map.svg", day_six_final_area_map, day_six_coords_named, br_x, br_y, scale)
 finite_results = DaySix.get_finite_results(day_six_final_area_map, br_x, br_y)
 finite_coord_count = DaySix.count_area_by_coord(finite_results)
-{loc, 4016} = DaySix.get_coord_with_greatest_area(finite_coord_count)
+{loc, 4016} = DaySix.get_coord_with_greatest_area(finite_coord_count) # Answer to Part 1
+
+
+# Part 2
+16 = DaySix.build_summed_distance_matrix(example_data_coords) |> Enum.filter(fn {_, d} -> d < 32 end) |> length()
+46306 = DaySix.build_summed_distance_matrix(day_six_coords) |> Enum.filter(fn {_, d} -> d < 10_000 end) |> length() # Solution
