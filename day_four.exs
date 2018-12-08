@@ -218,11 +218,11 @@ day_seven_graph = DaySeven.build_graph(day_seven_step_tuples)
 alias Aoc2018.DayEight
 example_data = "2 3 0 3 10 11 12 1 1 0 1 99 2 1 1 2"
 example_records = String.split(example_data, " ") |> Enum.map(& String.to_integer(&1))
-{_, 138, _} = DayEight.records_to_tree(example_records)
+{example_data_record, 138, _} = DayEight.records_to_tree(example_records)
 
 day_eight_records = "priv/day_eight_input.txt" |> File.read!() |> String.trim() |> String.split(" ") |> Enum.map(& String.to_integer(&1))
-{_, 37262, _} = DayEight.records_to_tree(day_eight_records) # Soluation Part 1
+{day_eight_record, 37262, _} = DayEight.records_to_tree(day_eight_records) # Soluation Part 1
+20839 = DayEight.node_value(day_eight_record) # Solution Part 2
 
-## Part Two
 
 
