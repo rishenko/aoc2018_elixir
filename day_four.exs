@@ -211,6 +211,18 @@ day_seven_graph = DaySeven.build_graph(day_seven_step_tuples)
 "BITRAQVSGUWKXYHMZPOCDLJNFE" =
   DaySeven.build_paths(day_seven_graph, day_seven_dependencies, day_seven_first_steps)
 
-{869, "BTVYIWRSKMAGQZUXHPOCDLJNFE"} = DaySeven.build_paths_by_time(day_seven_graph, day_seven_dependencies, 5, day_seven_first_steps)
+{869, "BTVYIWRSKMAGQZUXHPOCDLJNFE"} = DaySeven.build_paths_by_time(day_seven_graph, day_seven_dependencies, 5, day_seven_first_steps) #Solution to part 2
+
+
+# Day 8
+alias Aoc2018.DayEight
+example_data = "2 3 0 3 10 11 12 1 1 0 1 99 2 1 1 2"
+example_records = String.split(example_data, " ") |> Enum.map(& String.to_integer(&1))
+{_, 138, _} = DayEight.records_to_tree(example_records)
+
+day_eight_records = "priv/day_eight_input.txt" |> File.read!() |> String.trim() |> String.split(" ") |> Enum.map(& String.to_integer(&1))
+{_, 37262, _} = DayEight.records_to_tree(day_eight_records) # Soluation Part 1
+
+## Part Two
 
 
