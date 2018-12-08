@@ -198,6 +198,8 @@ first_steps = DaySeven.find_first_steps(step_tuples)
 dependencies = DaySeven.build_inverted_dependency_map(step_tuples)
 graph = DaySeven.build_graph(step_tuples)
 "CABDFE" = DaySeven.build_paths(graph, dependencies, first_steps)
+{22, "CABDFE"} = DaySeven.build_paths_by_time(graph, dependencies, 1, first_steps)
+{258, "CABFDE"} = DaySeven.build_paths_by_time(graph, dependencies, 2, first_steps)
 
 day_seven_step_tuples =
   "priv/day_seven_input.txt" |> File.read!() |> String.trim() |> String.split("\n") |> Enum.map(&DaySeven.line_to_step_tuple(&1))
@@ -208,5 +210,7 @@ day_seven_graph = DaySeven.build_graph(day_seven_step_tuples)
 # Solution, Part 1
 "BITRAQVSGUWKXYHMZPOCDLJNFE" =
   DaySeven.build_paths(day_seven_graph, day_seven_dependencies, day_seven_first_steps)
+
+{869, "BTVYIWRSKMAGQZUXHPOCDLJNFE"} = DaySeven.build_paths_by_time(day_seven_graph, day_seven_dependencies, 5, day_seven_first_steps)
 
 
