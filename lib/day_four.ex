@@ -1,34 +1,5 @@
 defmodule Aoc2018.DayFour do
   require Logger
-  # def parse_line(
-  #       <<"[", year::bytes-size(4), "-", month::bytes-size(2), "-", day::bytes-size(2), _::8,
-  #         hour::bytes-size(2), ":", min::bytes-size(2), "] ", rest::binary>>,
-  #       guard_id
-  #     ) do
-  #   timestamp =
-  #     {String.to_integer(year), String.to_integer(month), String.to_integer(day),
-  #      String.to_integer(hour), String.to_integer(min)}
-
-  #   rest |> String.trim() |> create_entry(timestamp, guard_id)
-  # end
-
-  # def parse_line(
-  #       <<"[", year::bytes-size(4), "-", month::bytes-size(2), "-", day::bytes-size(2), _::8,
-  #         hour::bytes-size(2), ":", min::bytes-size(2), "] ", rest::binary>>,
-  #       guard_id
-  #     ) do
-  #   {:ok, timestamp} =
-  #     NaiveDateTime.new(
-  #       String.to_integer(year),
-  #       String.to_integer(month),
-  #       String.to_integer(day),
-  #       String.to_integer(hour),
-  #       String.to_integer(min),
-  #       0
-  #     )
-
-  #   rest |> String.trim() |> create_entry(timestamp, guard_id)
-  # end
 
   def parse_line(
         <<"[", year::bytes-size(4), "-", month::bytes-size(2), "-", day::bytes-size(2), _::8,
@@ -72,11 +43,8 @@ defmodule Aoc2018.DayFour do
 
   def guard_sleep_calculator([{time_1, :asleep}, {time_2, :awake} | events], {total, minute_map}) do
     diff_seconds = NaiveDateTime.diff(time_2, time_1)
-
-    guard_sleep_calculator(
-      events,
-      {total + diff_seconds, build_minute_map(minute_map, time_1, diff_seconds)}
-    )
+    acc = {total + diff_seconds, build_minute_map(minute_map, time_1, diff_seconds)}
+    guard_sleep_calculator(events, acc)
   end
 
   def guard_sleep_calculator([_ | events], acc), do: guard_sleep_calculator(events, acc)
@@ -97,20 +65,14 @@ defmodule Aoc2018.DayFour do
 
   def guard_metrics([{id_1, time_1, :asleep}, {id_1, time_2, :awake} | events], acc) do
     diff_seconds = NaiveDateTime.diff(time_2, time_1)
-
-    guard_metrics(
-      events,
-      update_guard_metrics(acc, id_1, diff_seconds, time_1)
-    )
+    updated_metrics = update_guard_metrics(acc, id_1, diff_seconds, time_1)
+    guard_metrics(events, updated_metrics)
   end
 
   def guard_metrics([{id_1, time_1, :asleep}, {_, time_2, :shift_begins} | events], acc) do
     diff_seconds = NaiveDateTime.diff(time_2, time_1)
-
-    guard_metrics(
-      events,
-      update_guard_metrics(acc, id_1, diff_seconds, time_1)
-    )
+    updated_metrics = update_guard_metrics(acc, id_1, diff_seconds, time_1)
+    guard_metrics(events, updated_metrics)
   end
 
   def guard_metrics([{_, _, :shift_begins} | events], acc), do: guard_metrics(events, acc)
@@ -121,8 +83,9 @@ defmodule Aoc2018.DayFour do
   end
 
   def update_guard_metrics(acc, id, diff_seconds, time_1) do
-    Map.update(acc, id, {diff_seconds, build_minute_map(%{}, time_1, diff_seconds)}, fn {total,
-                                                                                         minute_map} ->
+    default_value = {diff_seconds, build_minute_map(%{}, time_1, diff_seconds)}
+
+    Map.update(acc, id, default_value, fn {total, minute_map} ->
       {total + diff_seconds, build_minute_map(minute_map, time_1, diff_seconds)}
     end)
   end

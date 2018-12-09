@@ -1,6 +1,8 @@
 defmodule Aoc2018.DaySix do
   require Logger
 
+  @multiple_text "."
+
   def line_to_coord(line) do
     [x, y] = String.split(line, ", ")
     {String.to_integer(x), String.to_integer(y)}
@@ -33,16 +35,18 @@ defmodule Aoc2018.DaySix do
   end
 
   def get_finite_results(area_list, hx, hy) do
-    coords_to_ignore =
-      Enum.reduce(area_list, MapSet.new(), fn {{x, y}, coord}, set ->
-        if x == 0 or x == hx or y == 0 or y == hy do
-          MapSet.put(set, coord)
-        else
-          set
-        end
-      end)
-
+    coords_to_ignore = gather_ignorable_coords(area_list, hx, hy)
     Enum.filter(area_list, fn {_, coord} -> coord not in coords_to_ignore end)
+  end
+
+  def gather_ignorable_coords(area_list, hx, hy) do
+    Enum.reduce(area_list, MapSet.new(), fn {{x, y}, coord}, set ->
+      if x == 0 or x == hx or y == 0 or y == hy do
+        MapSet.put(set, coord)
+      else
+        set
+      end
+    end)
   end
 
   def count_area_by_coord(area_list) do
@@ -73,12 +77,11 @@ defmodule Aoc2018.DaySix do
     end
   end
 
-
   def sum_manhattan_distance(coord, area_list) do
     area_list
     |> Enum.map(fn {loc, curr_distance} ->
       distance = manhattan_distance(coord, loc)
-      {loc, distance+curr_distance}
+      {loc, distance + curr_distance}
     end)
   end
 
@@ -128,51 +131,48 @@ defmodule Aoc2018.DaySix do
     width = hx * scale + scale
     height = hy * scale + scale
 
-    content =
-      Enum.map(area_list, fn {loc, coord} ->
-        case coord do
-          :multiple ->
-            svg_text_elem(".", loc, scale, "normal")
-
-          coord ->
-            weight = get_weight(coord, loc)
-
-            named_coords
-            |> Map.get(coord)
-            |> svg_text_elem(loc, scale, weight)
-        end
-      end)
-      |> Enum.join("\r\n")
-
     """
     <?xml version="1.0" encoding="UTF-8" standalone="no"?>
     <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
     <svg width="#{width}" height="#{height}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    #{content}
+    #{build_board_content(area_list, named_coords, scale)}
     </svg>
     """
   end
 
-  def get_weight(coord1, coord1), do: "bold"
-  def get_weight(_, _), do: "normal"
+  def build_board_content(area_list, named_coords, scale) do
+    area_list
+    |> Enum.map(fn {loc, coord} -> coord_to_svg(coord, loc, scale, named_coords) end)
+    |> Enum.join("\r\n")
+  end
 
-  def svg_text_elem(text, {x, y}, scale, weight) do
+  def coord_to_svg(:multiple, l, s, _), do: svg_text_elem(@multiple_text, l, s, false)
+
+  def coord_to_svg(coord, loc, scale, named_coords) do
+    named_coords
+    |> Map.get(coord)
+    |> svg_text_elem(loc, scale, is_origin?(coord, loc))
+  end
+
+  def is_origin?(coord1, coord1), do: true
+  def is_origin?(_, _), do: false
+
+  def svg_text_elem(text, {x, y}, scale, origin?) do
     x = x * scale
     y = y * scale
 
-    case weight do
-      "normal" ->
-        ~s|
-        <text x="#{x}" y="#{y}" font-size="#{scale - 2}">#{text}</text>
-        |
-
-      "bold" ->
-        ~s|
+    if origin? and text != @multiple_text do
+      ~s|
         <text x="#{x}" y="#{y}" font-size="#{scale - 2}" font-weight="bold">#{text}</text>
         <rect x="#{x - div(scale, 4)}" y="#{y - scale + 2}" fill="none" width="#{scale}" height="#{
-          scale
-        }" style="fill: none; stroke-width: 1; stroke: black;"/>
+        scale
+      }" style="fill: none; stroke-width: 1; stroke: black;"/>
         |
+    else
+      ~s|
+          <text x="#{x}" y="#{y}" font-size="#{scale - 2}">#{text}</text>
+          |
     end
+    |> String.trim()
   end
 end
